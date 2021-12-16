@@ -1,4 +1,6 @@
 from ._ffi import rpmverNew, rpmverFree, rpmverCmp, NULL, cstr, gc
+from ._transaction import TransactionSet
+from ._const import *
 
 # This is what we need:
 

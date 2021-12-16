@@ -1,11 +1,17 @@
 from cffi import FFI
 
 ffi = FFI()
-ffi.cdef("""
+ffi.cdef(
+    """
     void* rpmverNew(const char *e, const char *v, const char *r);
     void* rpmverFree(void*);
     int rpmverCmp(void*, void*);
-""")
+
+    void* rpmtsCreate();
+    void* rpmtsFree(void*);
+    uint32_t rpmtsSetVSFlags(void*, uint32_t);
+"""
+)
 
 rpm = ffi.dlopen("rpm")
 rpmio = ffi.dlopen("rpmio")
@@ -19,13 +25,19 @@ rpmio = ffi.dlopen("rpmio")
 NULL = ffi.NULL
 gc = ffi.gc
 
+
 def cstr(value, nullable=False):
     if value is None and nullable:
         return NULL
     if value is None and not nullable:
         raise TypeError("expected str, got None")
-    return value.encode('utf-8')
+    return value.encode("utf-8")
+
 
 rpmverNew = rpmio.rpmverNew
 rpmverFree = rpmio.rpmverFree
 rpmverCmp = rpmio.rpmverCmp
+
+rpmtsCreate = rpm.rpmtsCreate
+rpmtsFree = rpm.rpmtsFree
+rpmtsSetVSFlags = rpm.rpmtsSetVSFlags

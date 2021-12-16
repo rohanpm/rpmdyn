@@ -16,27 +16,27 @@ PTH_PATH = os.path.join(os.path.dirname(__file__), 'src', 'rpmdyn', 'rpmdyn.pth'
 
 class BuildWithPTH(build_py):
     def run(self, *args, **kwargs):
-        super().run(*args, **kwargs)
+        build_py.run(self, *args, **kwargs)
         dest = os.path.join(self.build_lib, os.path.basename(PTH_PATH))
         self.copy_file(PTH_PATH, dest)
 
 
 class InstallLibWithPTH(install_lib):
     def run(self, *args, **kwargs):
-        super().run(*args, **kwargs)
+        install_lib.run(self, *args, **kwargs)
         dest = os.path.join(self.install_dir, os.path.basename(PTH_PATH))
         self.copy_file(PTH_PATH, dest)
         self.outputs = [dest]
 
     def get_outputs(self):
-        return list(super().get_outputs()) + self.outputs
+        return list(install_lib.get_outputs(self)) + self.outputs
 
 
 class DevelopWithPTH(develop):
     # FIXME: when package is installed in editable mode, figure out how to
     # make 'pip uninstall' delete the .pth.
     def run(self, *args, **kwargs):
-        super().run(*args, **kwargs)
+        develop.run(self, *args, **kwargs)
         dest = os.path.join(self.install_dir, os.path.basename(PTH_PATH))
         self.copy_file(PTH_PATH, dest)
 
