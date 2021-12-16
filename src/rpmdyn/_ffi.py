@@ -9,11 +9,14 @@ ffi.cdef(
     typedef int32_t rpmTagVal;
     typedef int32_t rpmTagType;
     typedef int32_t rpmTagClass;
+    typedef int32_t rpmTagReturnType;
     typedef uint32_t rpmtdFlags;
 
     void* rpmverNew(const char *e, const char *v, const char *r);
     void* rpmverFree(void*);
     int rpmverCmp(void*, void*);
+
+    rpmTagReturnType rpmTagGetReturnType(rpmTagVal);
 
     void* fdDup(int);
 
@@ -25,6 +28,11 @@ ffi.cdef(
     rpmTagClass rpmtdClass(rpmtd);
     rpmtdFlags rpmtdGetFlags(rpmtd);
     const char* rpmtdGetString(rpmtd);
+    uint64_t rpmtdGetNumber(rpmtd);
+    const char* rpmtdNextString(rpmtd);
+
+    int rpmtdInit(rpmtd);
+    int rpmtdNext(rpmtd);
 
     void* rpmtsCreate();
     void* rpmtsFree(void*);
@@ -63,6 +71,7 @@ rpmverNew = rpmio.rpmverNew
 rpmverFree = rpmio.rpmverFree
 rpmverCmp = rpmio.rpmverCmp
 
+rpmTagGetReturnType = rpm.rpmTagGetReturnType
 fdDup = rpmio.fdDup
 
 rpmtdNew = rpm.rpmtdNew
@@ -73,6 +82,10 @@ rpmtdType = rpm.rpmtdType
 rpmtdClass = rpm.rpmtdClass
 rpmtdGetFlags = rpm.rpmtdGetFlags
 rpmtdGetString = rpm.rpmtdGetString
+rpmtdGetNumber = rpm.rpmtdGetNumber
+rpmtdNextString = rpm.rpmtdNextString
+rpmtdInit = rpm.rpmtdInit
+rpmtdNext = rpm.rpmtdNext
 
 rpmtsCreate = rpm.rpmtsCreate
 rpmtsFree = rpm.rpmtsFree

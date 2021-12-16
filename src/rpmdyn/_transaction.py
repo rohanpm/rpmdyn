@@ -16,48 +16,79 @@ RPM_STRING_ARRAY_TYPE = 8
 RPM_I18NSTRING_TYPE = 9
 
 
+RPM_ANY_RETURN_TYPE = 0
+RPM_SCALAR_RETURN_TYPE = 0x00010000
+RPM_ARRAY_RETURN_TYPE = 0x00020000
+RPM_MAPPING_RETURN_TYPE = 0x00040000
+RPM_MASK_RETURN_TYPE = 0xFFFF0000
+
+
 class Header(object):
     def __init__(self, h):
         self.__h = h
 
     def __getitem__(self, key):
-        if isinstance(key, str):
-            key = getattr(_const, key, None)
-        assert key
-        print("getitem", key, self.__h)
         td = gc(_ffi.rpmtdNew(), _ffi.rpmtdFree)
-        res = _ffi.headerGet(self.__h, key, td, HEADERGET_EXT)
-        assert res == 1
-        print("res", res)
-        print("td", td)
+
+        # Result intentionally not checked - official bindings do the same.
+        _ffi.headerGet(self.__h, key, td, HEADERGET_EXT)
+
+        # TODO: check flags: _ffi.rpmtdGetFlags(td)
+
+        rtype = _ffi.rpmTagGetReturnType(key)
+        is_array = (rtype & RPM_MASK_RETURN_TYPE) == RPM_ARRAY_RETURN_TYPE
 
         td_type = _ffi.rpmtdType(td)
-        print("td flags", _ffi.rpmtdGetFlags(td))
-        print("td count", _ffi.rpmtdCount(td))
-        print("td class", _ffi.rpmtdClass(td))
-        print("td type", _ffi.rpmtdType(td))
+
+        def unimplemented(_td):
+            raise NotImplementedError(key)
+
+        get_value = unimplemented
+
+        out = []
 
         if td_type == RPM_NULL_TYPE:
-            return None
+            get_value = lambda _: None
         elif td_type == RPM_CHAR_TYPE:
-            raise NotImplementedError()
-        elif td_type == RPM_INT8_TYPE:
-            raise NotImplementedError()
-        elif td_type == RPM_INT16_TYPE:
-            raise NotImplementedError()
-        elif td_type == RPM_INT32_TYPE:
-            raise NotImplementedError()
-        elif td_type == RPM_INT64_TYPE:
-            raise NotImplementedError()
+            pass
+        elif td_type in [RPM_INT8_TYPE, RPM_INT16_TYPE, RPM_INT32_TYPE, RPM_INT64_TYPE]:
+            get_value = _ffi.rpmtdGetNumber
         elif td_type == RPM_STRING_TYPE:
             # TODO: figure out if I'm supposed to copy it
-            return _ffi.ffi.string(_ffi.rpmtdGetString(td))
+            get_value = lambda x: _ffi.ffi.string(_ffi.rpmtdGetString(x))
         elif td_type == RPM_BIN_TYPE:
-            raise NotImplementedError()
+            # FIXME: I don't see any public API for getting binary data
+            # out of an rpmtd. Am I missing something?
+            # Native python binaries use internal API for this.
+            get_value = lambda x: None
         elif td_type == RPM_STRING_ARRAY_TYPE:
-            raise NotImplementedError()
+            # TODO: what's the deal with this vs RPM_ARRAY_RETURN_TYPE & string?
+            get_value = lambda x: _ffi.ffi.string(_ffi.rpmtdGetString(x))
+            # out = []
+            # # const char* rpmtdNextString	(	rpmtd 	td	)
+            # while True:
+            #     value = _ffi.rpmtdNextString(td)
+            #     if value == _ffi.NULL:
+            #         break
+            #     out.append(_ffi.ffi.string(value))
+            # return out
         elif td_type == RPM_I18NSTRING_TYPE:
-            raise NotImplementedError()
+            pass
+
+        _ffi.rpmtdInit(td)
+
+        for _ in range(0, 100000):
+            if _ffi.rpmtdNext(td) == -1:
+                break
+            out.append(get_value(td))
+
+        if is_array:
+            return out
+
+        if out:
+            return out[0]
+
+        return None
 
 
 class TransactionSet(object):
