@@ -1,9 +1,68 @@
-from ._ffi import rpmtsCreate, rpmtsFree, rpmtsSetVSFlags, gc
+from ._ffi import gc
+from . import _ffi, _const
+
+
+HEADERGET_EXT = 2
+
+RPM_NULL_TYPE = 0
+RPM_CHAR_TYPE = 1
+RPM_INT8_TYPE = 2
+RPM_INT16_TYPE = 3
+RPM_INT32_TYPE = 4
+RPM_INT64_TYPE = 5
+RPM_STRING_TYPE = 6
+RPM_BIN_TYPE = 7
+RPM_STRING_ARRAY_TYPE = 8
+RPM_I18NSTRING_TYPE = 9
+
+
+class Header(object):
+    def __init__(self, h):
+        self.__h = h
+
+    def __getitem__(self, key):
+        if isinstance(key, str):
+            key = getattr(_const, key, None)
+        assert key
+        print("getitem", key, self.__h)
+        td = gc(_ffi.rpmtdNew(), _ffi.rpmtdFree)
+        res = _ffi.headerGet(self.__h, key, td, HEADERGET_EXT)
+        assert res == 1
+        print("res", res)
+        print("td", td)
+
+        td_type = _ffi.rpmtdType(td)
+        print("td flags", _ffi.rpmtdGetFlags(td))
+        print("td count", _ffi.rpmtdCount(td))
+        print("td class", _ffi.rpmtdClass(td))
+        print("td type", _ffi.rpmtdType(td))
+
+        if td_type == RPM_NULL_TYPE:
+            return None
+        elif td_type == RPM_CHAR_TYPE:
+            raise NotImplementedError()
+        elif td_type == RPM_INT8_TYPE:
+            raise NotImplementedError()
+        elif td_type == RPM_INT16_TYPE:
+            raise NotImplementedError()
+        elif td_type == RPM_INT32_TYPE:
+            raise NotImplementedError()
+        elif td_type == RPM_INT64_TYPE:
+            raise NotImplementedError()
+        elif td_type == RPM_STRING_TYPE:
+            # TODO: figure out if I'm supposed to copy it
+            return _ffi.ffi.string(_ffi.rpmtdGetString(td))
+        elif td_type == RPM_BIN_TYPE:
+            raise NotImplementedError()
+        elif td_type == RPM_STRING_ARRAY_TYPE:
+            raise NotImplementedError()
+        elif td_type == RPM_I18NSTRING_TYPE:
+            raise NotImplementedError()
 
 
 class TransactionSet(object):
     def __init__(self):
-        self.__ts = gc(rpmtsCreate(), rpmtsFree)
+        self.__ts = gc(_ffi.rpmtsCreate(), _ffi.rpmtsFree)
 
     # _probFilter = 0
 
@@ -14,7 +73,7 @@ class TransactionSet(object):
 
     def setVSFlags(self, flags):
         # TODO: supposed to return old value
-        return rpmtsSetVSFlags(self.__ts, flags)
+        return _ffi.rpmtsSetVSFlags(self.__ts, flags)
 
     #     return self._wrapSetGet('_vsflags', flags)
 
@@ -177,17 +236,34 @@ class TransactionSet(object):
     #     elif res != rpm.RPMRC_OK:
     #         raise rpm.error(msg)
 
-    # def hdrFromFdno(self, fd):
-    #     res, h = TransactionSetCore.hdrFromFdno(self, fd)
-    #     # generate backwards compatibly broken exceptions
-    #     if res == rpm.RPMRC_NOKEY:
-    #         raise rpm.error("public key not available")
-    #     elif res == rpm.RPMRC_NOTTRUSTED:
-    #         raise rpm.error("public key not trusted")
-    #     elif res != rpm.RPMRC_OK:
-    #         raise rpm.error("error reading package header")
+    def hdrFromFdno(self, fd):
+        assert isinstance(fd, int)
 
-    #     return h
+        rpmfd = _ffi.fdDup(fd)
+
+        # FIXME: this sucks.
+        #
+        # Header is already an opaque struct, rpmReadPackageFile takes a Header*,
+        # so a pointer-to-pointer. cffi seems to refuse taking an address to a
+        # pointer and I can't find a clean way to make this work.
+        #
+        # So, what we do is allocate an array which is surely greater than the
+        # size of the real header struct.
+
+        # h = gc(_ffi.headerNew(), _ffi.headerFree)
+        # hstar = _ffi.ffi.new("void*")
+        h = _ffi.ffi.new("Header*")
+        res = _ffi.rpmReadPackageFile(
+            self.__ts,
+            rpmfd,
+            _ffi.NULL,
+            h,
+        )
+
+        # TODO: raise proper exceptions
+        assert res == _const.RPMRC_OK
+
+        return Header(_ffi.ffi.cast("Header", h[0]))
 
 
 # include "rpmsystem-py.h"
