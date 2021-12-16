@@ -57,10 +57,12 @@ class Header(object):
             # TODO: figure out if I'm supposed to copy it
             get_value = lambda x: _ffi.ffi.string(_ffi.rpmtdGetString(x))
         elif td_type == RPM_BIN_TYPE:
-            # FIXME: I don't see any public API for getting binary data
-            # out of an rpmtd. Am I missing something?
-            # Native python binaries use internal API for this.
-            get_value = lambda x: None
+            # bytes_offset = td_data_offset()
+            bytes_count = td.count
+
+            data = _ffi.ffi.cast("char*", td.data)
+            bytes = _ffi.ffi.unpack(data, bytes_count)
+            get_value = lambda x: bytes
         elif td_type == RPM_STRING_ARRAY_TYPE:
             # TODO: what's the deal with this vs RPM_ARRAY_RETURN_TYPE & string?
             get_value = lambda x: _ffi.ffi.string(_ffi.rpmtdGetString(x))

@@ -4,13 +4,24 @@ ffi = FFI()
 ffi.cdef(
     """
     typedef void* Header;
-    typedef void* rpmtd;
+    typedef void* rpm_data_t;
     typedef uint32_t rpm_count_t;
     typedef int32_t rpmTagVal;
     typedef int32_t rpmTagType;
     typedef int32_t rpmTagClass;
     typedef int32_t rpmTagReturnType;
     typedef uint32_t rpmtdFlags;
+
+    struct rpmtd_s {
+        int32_t tag;	/* rpm tag of this data entry*/
+        int32_t type;	/* data type */
+        rpm_count_t count;	/* number of entries */
+        rpm_data_t data;	/* pointer to actual data */
+        rpmtdFlags flags;	/* flags on memory allocation etc */
+        int ix;		/* iteration index */
+        rpm_count_t size;	/* size of data (only works for RPMTD_IMMUTABLE atm) */
+    };
+    typedef struct rpmtd_s* rpmtd;
 
     void* rpmverNew(const char *e, const char *v, const char *r);
     void* rpmverFree(void*);
@@ -30,6 +41,7 @@ ffi.cdef(
     const char* rpmtdGetString(rpmtd);
     uint64_t rpmtdGetNumber(rpmtd);
     const char* rpmtdNextString(rpmtd);
+    int rpmtdFromUint8(rpmtd, rpmTagVal, uint8_t*, rpm_count_t);
 
     int rpmtdInit(rpmtd);
     int rpmtdNext(rpmtd);
@@ -86,6 +98,7 @@ rpmtdGetNumber = rpm.rpmtdGetNumber
 rpmtdNextString = rpm.rpmtdNextString
 rpmtdInit = rpm.rpmtdInit
 rpmtdNext = rpm.rpmtdNext
+rpmtdFromUint8 = rpm.rpmtdFromUint8
 
 rpmtsCreate = rpm.rpmtsCreate
 rpmtsFree = rpm.rpmtsFree
