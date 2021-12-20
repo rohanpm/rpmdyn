@@ -45,6 +45,13 @@ class Header(object):
 
         get_value = unimplemented
 
+        def get_string(x):
+            # TODO: this will return unicode strings.
+            # It is compatible with modern versions of rpm, but not older.
+            # Should we try to support both?
+            # TODO: and is it right to assume utf8?
+            return _ffi.ffi.string(_ffi.rpmtdGetString(x)).decode("utf-8")
+
         out = []
 
         if td_type == RPM_NULL_TYPE:
@@ -54,8 +61,7 @@ class Header(object):
         elif td_type in [RPM_INT8_TYPE, RPM_INT16_TYPE, RPM_INT32_TYPE, RPM_INT64_TYPE]:
             get_value = _ffi.rpmtdGetNumber
         elif td_type == RPM_STRING_TYPE:
-            # TODO: figure out if I'm supposed to copy it
-            get_value = lambda x: _ffi.ffi.string(_ffi.rpmtdGetString(x))
+            get_value = get_string
         elif td_type == RPM_BIN_TYPE:
             # bytes_offset = td_data_offset()
             bytes_count = td.count
@@ -65,7 +71,7 @@ class Header(object):
             get_value = lambda x: bytes
         elif td_type == RPM_STRING_ARRAY_TYPE:
             # TODO: what's the deal with this vs RPM_ARRAY_RETURN_TYPE & string?
-            get_value = lambda x: _ffi.ffi.string(_ffi.rpmtdGetString(x))
+            get_value = get_string
             # out = []
             # # const char* rpmtdNextString	(	rpmtd 	td	)
             # while True:
