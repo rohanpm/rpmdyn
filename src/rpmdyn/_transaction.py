@@ -1,4 +1,4 @@
-from ._ffi import gc
+from ._ffi import gc, cstr
 from . import _ffi, _const
 
 
@@ -97,6 +97,10 @@ class TransactionSet(object):
     def __init__(self):
         self.__ts = gc(_ffi.rpmtsCreate(), _ffi.rpmtsFree)
 
+        # native bindings set a default vsflags
+        flags = _ffi.rpmExpandNumeric(cstr("%{?__vsflags}"))
+        self.setVSFlags(flags)
+
     # _probFilter = 0
 
     # def _wrapSetGet(self, attr, val):
@@ -110,8 +114,8 @@ class TransactionSet(object):
 
     #     return self._wrapSetGet('_vsflags', flags)
 
-    # def getVSFlags(self):
-    #     return self._vsflags
+    def getVSFlags(self):
+        return _ffi.rpmtsVSFlags(self.__ts)
 
     # def setVfyFlags(self, flags):
     #     return self._wrapSetGet('_vfyflags', flags)

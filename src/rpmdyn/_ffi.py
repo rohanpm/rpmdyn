@@ -49,12 +49,15 @@ ffi.cdef(
     void* rpmtsCreate();
     void* rpmtsFree(void*);
     uint32_t rpmtsSetVSFlags(void*, uint32_t);
+    uint32_t rpmtsVSFlags(void*);
 
     int rpmReadPackageFile(void*, void*, const char*, Header*);
 
     Header headerNew();
     Header headerFree(void*);
     int headerGet(Header, int32_t, void*, uint32_t);
+
+    int rpmExpandNumeric(const char*);
 """
 )
 
@@ -103,9 +106,12 @@ rpmtdFromUint8 = rpm.rpmtdFromUint8
 rpmtsCreate = rpm.rpmtsCreate
 rpmtsFree = rpm.rpmtsFree
 rpmtsSetVSFlags = rpm.rpmtsSetVSFlags
+rpmtsVSFlags = rpm.rpmtsVSFlags
 
 rpmReadPackageFile = rpm.rpmReadPackageFile
 
 headerNew = rpm.headerNew
 headerFree = rpm.headerFree
 headerGet = rpm.headerGet
+
+rpmExpandNumeric = rpm.rpmExpandNumeric
