@@ -12,6 +12,19 @@ ffi.cdef(
     typedef int32_t rpmTagReturnType;
     typedef uint32_t rpmtdFlags;
 
+    /*
+        We'd rather not depend on RPM's data structures, but in this case we
+        do copy this declaration since:
+
+        - it's not opaque in RPM - it is really in the public headers. So presumably
+          it won't be changed often (hopefully ever) as that would not be
+          ABI-compatible.
+
+        - best I can tell, there is no public API which makes it possible to get
+          at raw data of type RPM_BIN_TYPE. The native python bindings rely on
+          internals to make those headers readable. We do the same since there is
+          no other choice as far as I can see.
+    */
     struct rpmtd_s {
         int32_t tag;	/* rpm tag of this data entry*/
         int32_t type;	/* data type */
@@ -64,21 +77,16 @@ ffi.cdef(
 rpm = ffi.dlopen("rpm")
 rpmio = ffi.dlopen("rpmio")
 
-# >>> arg = ffi.new("char[]", b"world")        # equivalent to C code: char arg[] = "world";
-# >>> C.printf(b"hi there, %s.\n", arg)        # call printf
-# hi there, world.
-# 17                                           # this is the return value
-# >>>
-
 NULL = ffi.NULL
 gc = ffi.gc
 
 
-def cstr(value, nullable=False):
+def cstr(value, nullable=False, error=None):
     if value is None and nullable:
         return NULL
     if value is None and not nullable:
-        raise TypeError("expected str, got None")
+        error = error or TypeError("expected str, got None")
+        raise error
     return value.encode("utf-8")
 
 

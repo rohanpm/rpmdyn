@@ -58,6 +58,9 @@ def header_test_srpm(rpm):
         ("walrus", "requireversion", [u"3.0.4-1", u"4.0-1"]),
         ("walrus", "requireflags", [long_type(16777290), long_type(16777290)]),
         ("test_srpm", "provideflags", []),
+        ("walrus", "filestates", []),
+        ("walrus", "summary", u"A dummy package of walrus"),
+        ("test_srpm", "filestates", []),
     ],
 )
 def test_header_value(request, rpmname, key, value, rpm):
