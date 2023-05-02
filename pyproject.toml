@@ -1,0 +1,15 @@
+[project]
+name = "rpmdyn"
+dynamic = ["version", "dependencies"]
+
+[project.urls]
+homepage = "https://github.com/rohanpm/rpmdyn"
+
+[tool.setuptools.dynamic]
+version = {attr = "rpmdyn.__version__"}
+dependencies = {file = "requirements.txt"}
+
+[build-system]
+requires = ["setuptools>=40.8.0", "wheel", "buildsys-dateversion"]
+backend-path = ["custom_build"]
+build-backend = "backend"
