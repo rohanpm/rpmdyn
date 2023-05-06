@@ -1,18 +1,16 @@
-import os
 import glob
+import os
 import shutil
 import subprocess
 import tempfile
-from typing import Optional
+
 import buildsys_dateversion
 from buildsys_dateversion import *
 
 PTH_PATH = os.path.join("src", "rpmdyn", "rpmdyn.pth")
 
 
-def repack_with_pth(
-    wheel_path: str, wheel_pack_args: Optional[list[str]] = None
-) -> str:
+def repack_with_pth(wheel_path: str, wheel_pack_args=None) -> str:
     wheel_pack_args = wheel_pack_args or []
 
     wheel_dir = os.path.dirname(wheel_path)

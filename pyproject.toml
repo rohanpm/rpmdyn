@@ -6,8 +6,11 @@ dynamic = ["version", "dependencies"]
 homepage = "https://github.com/rohanpm/rpmdyn"
 
 [tool.setuptools.dynamic]
-version = {attr = "rpmdyn.__version__"}
-dependencies = {file = "requirements.txt"}
+version = { attr = "rpmdyn.__version__" }
+dependencies = { file = "requirements.in" }
+
+[tool.isort]
+profile = "black"
 
 [build-system]
 requires = ["setuptools>=40.8.0", "wheel", "buildsys-dateversion"]
