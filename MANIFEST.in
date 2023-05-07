@@ -1,3 +1,6 @@
 graft src
 graft custom_build
-include requirements.txt
+graft tests
+include requirements.in
+include LICENSE
+global-exclude *.py[cod]
