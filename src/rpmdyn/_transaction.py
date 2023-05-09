@@ -101,7 +101,8 @@ class TransactionSet(object):
         flags = _ffi.rpmExpandNumeric(cstr("%{?__vsflags}"))
         self.setVSFlags(flags)
 
-    # TODO: ts.setKeyring
+    def setKeyring(self, keyring):
+        return _ffi.rpmtsSetKeyring(self.__ts, keyring._keyring__kr if keyring else _ffi.NULL)
 
     def setVSFlags(self, flags):
         return _ffi.rpmtsSetVSFlags(self.__ts, flags)

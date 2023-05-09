@@ -10,6 +10,16 @@ def test_setVSFlags(rpm):
     assert ts.setVSFlags(rpm._RPMVSF_NODIGESTS) == rpm._RPMVSF_NOSIGNATURES
 
 
+def test_setKeyring(rpm):
+    ts = rpm.TransactionSet()
+
+    # Can setKeyring to an empty keyring without crashing.
+    ts.setKeyring(rpm.keyring())
+
+    # Can setKeyring to None without crashing.
+    ts.setKeyring(None)
+
+
 def test_initial_flags(rpm_native, rpm_dyn):
     # Initial value of flags should be same on both implementations
     ts_native = rpm_native.TransactionSet()
