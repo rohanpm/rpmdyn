@@ -1,0 +1,11 @@
+on:
+  workflow_dispatch: {}
+  schedule:
+  - cron: "20 20 * * 0"
+
+name: "pip-compile: create PR"
+jobs:
+ pip-compile:
+  uses: rohanpm/workflows/.github/workflows/pip-compile.yml@4e3a735a24fcba94a0274e46cd8c49b66f453b4d
+  secrets:
+    pip-compile-token: ${{ secrets.PIP_COMPILE_TOKEN }}
