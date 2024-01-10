@@ -1,3 +1,5 @@
+from io import IOBase
+
 from ._ffi import gc, cstr
 from . import _ffi, _const
 
@@ -111,6 +113,11 @@ class TransactionSet(object):
         return _ffi.rpmtsVSFlags(self.__ts)
 
     def hdrFromFdno(self, fd):
+        # Accept the Buffered I/O stream object as fd. It inherits IOBase
+        # the proides the underlying FD number where available.
+        if isinstance(fd, IOBase):
+            fd = fd.fileno()
+
         assert isinstance(fd, int)
 
         rpmfd = _ffi.fdDup(fd)
