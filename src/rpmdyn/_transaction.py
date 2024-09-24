@@ -133,4 +133,4 @@ class TransactionSet(object):
         # TODO: raise proper exceptions
         assert res == _const.RPMRC_OK
 
-        return Header(_ffi.ffi.cast("Header", h[0]))
+        return Header(gc(_ffi.ffi.cast("Header", h[0]), _ffi.headerFree))
