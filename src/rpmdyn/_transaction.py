@@ -120,7 +120,7 @@ class TransactionSet(object):
 
         assert isinstance(fd, int)
 
-        rpmfd = _ffi.fdDup(fd)
+        rpmfd = gc(_ffi.fdDup(fd), _ffi.Fclose)
 
         h = _ffi.ffi.new("Header*")
         res = _ffi.rpmReadPackageFile(
