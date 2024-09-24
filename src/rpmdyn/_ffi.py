@@ -4,6 +4,7 @@ ffi = FFI()
 ffi.cdef(
     """
     typedef void* Header;
+    typedef void* FD_t;
     typedef void* rpm_data_t;
     typedef void* rpmKeyring;
     typedef uint32_t rpm_count_t;
@@ -43,7 +44,8 @@ ffi.cdef(
 
     rpmTagReturnType rpmTagGetReturnType(rpmTagVal);
 
-    void* fdDup(int);
+    FD_t fdDup(int);
+    int Fclose(FD_t);
 
     rpmtd rpmtdNew();
     rpmtd rpmtdFree(void*);
@@ -101,6 +103,7 @@ rpmverCmp = rpmio.rpmverCmp
 
 rpmTagGetReturnType = rpm.rpmTagGetReturnType
 fdDup = rpmio.fdDup
+Fclose = rpmio.Fclose
 
 rpmtdNew = rpm.rpmtdNew
 rpmtdFree = rpm.rpmtdFree

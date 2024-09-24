@@ -120,7 +120,7 @@ class TransactionSet(object):
 
         assert isinstance(fd, int)
 
-        rpmfd = _ffi.fdDup(fd)
+        rpmfd = gc(_ffi.fdDup(fd), _ffi.Fclose)
 
         h = _ffi.ffi.new("Header*")
         res = _ffi.rpmReadPackageFile(
@@ -133,4 +133,4 @@ class TransactionSet(object):
         # TODO: raise proper exceptions
         assert res == _const.RPMRC_OK
 
-        return Header(_ffi.ffi.cast("Header", h[0]))
+        return Header(gc(_ffi.ffi.cast("Header", h[0]), _ffi.headerFree))
